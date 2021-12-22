@@ -10,6 +10,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(deSolve)
+library(GGally)
+library(skimr)
+library(palmerpenguins)
 ```
 
 # EDS 212: Essential Math for Environmental Data Science
@@ -40,8 +43,8 @@ ex_3_212.1 <- seq(from = 1, to = 5000, by = 10)
 ```
 
 ### Create a function for logistic growth
-Given the carrying capacity, initial population, growth rate, and time, use the logistic growth model to estimate the population at that time.
 ```{r}
+# Given the carrying capacity, initial population, growth rate, and time, use the logistic growth model to estimate the population at that time
 pop_logistic <- function(capacity, init_pop, rate, time_yr) {
   capacity / (1 + ((capacity - init_pop) / init_pop) * exp(-rate * time_yr))
 }
@@ -53,10 +56,8 @@ pop_logistic(capacity = 2580, init_pop = 230, rate = 0.32, time_yr = 2.4)
 ```{r}
 # Create a vector of times from 0 to 20 by increments of 0.5
 time_vec <- seq(from = 0, to = 45, by = 0.25)
-```
 
-Now let's estimate the population over that range of times, given capacity = 2580, initial population = 230, rate = 0.32
-```{r}
+# estimate the population over that range of times, given capacity = 2580, initial population = 230, rate = 0.32
 chipmunk_pop <- pop_logistic(capacity = 2580, init_pop = 230, rate = 0.32, time_yr = time_vec)
 ```
 
@@ -95,18 +96,8 @@ Make function to calculate fish weight from a, L, and b, calculate weights for o
 W <- function(a, L, b) {
   a * L^b}
 
-# Milkfish weights
-W(a = 0.0905, b = 2.52, L = 60)
-
-# Giant trevally weights
-W(a = 0.0353, b = 3.05, L = 60)
-
-# Great barracuda weights
-W(a = 0.0181, b = 3.27, L = 60)
-
 # Create df sequence of size ranges from 0-200 by 1 cm
 fish_length <- seq(from = 0, to = 200, by = 1)
-
 barracuda_weight <- W(a = 0.0181, b = 3.27, L = fish_length)
 
 # Bind lengths and estimate barracuda lengths in one df
@@ -131,18 +122,16 @@ df_dx <- D(expr = fx, name = 'x')
 x <- 3
 
 eval(expr = df_dx)
-```
 
-```{r}
+
 Pa <- expression(2 * (3 * a + 2)^4 - 5)
 
 dP_da <- D(expr = Pa, name = 'a')
 a <- 1.2
 
 eval(expr = dP_da)
-```
 
-```{r}
+
 gt <- expression((-4) / (t^2 +1)^3)
 
 dg_dt <- D(expr = gt, name ='t')
@@ -235,38 +224,9 @@ x <- 10
 eval(expr = dh_dx)
 ```
 
-## Day 2 Practice: 
-Plot a function in `ggplot2`
-```{r}
-eq <- function(x) {
-  3 * x^2 + 4
-}
-
-# Use stat_function()
-ggplot(data = data.frame(x = c(1, 100)), aes(x = x)) + 
-  stat_function(fun = eq)
-
-```
-
-### Practice:
-Plot $f(x)=2.4-5x^3+2.1x^2$
-Over range of -50 to +50
-```{r}
-p_eq <- function(x) {
-  2.4 - 5 * x^3 + 2.1 * x^2
-}
-# two examples above of how to create `ggplot`
-ggplot(data = data.frame(x = c(-50, 50)), aes(x = x)) +
-  stat_function(fun = p_eq)
-
-ggplot(data = NULL) + 
-  stat_function(fun = p_eq) +
-  xlim(min = -50, max = 50)
-```
-
 ### Practice: `penguins` body mass and flipper lenghts
-Basic ggplot scatterplot of body mass (y) and flipper length (x)
 ```{r}
+# Basic ggplot scatterplot of body mass (y) and flipper length (x)
 ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
   geom_point()
 # positively correlated, linear slope, notice the x-axis doesn't start at 0, homosedastic (spread of data around model is pretty equal, look for clusters/patterns/etc.)
@@ -300,34 +260,8 @@ ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
 # change theme (Google to get lots of options) using `theme`
 ```
 
-### Practice: Higher Order Derivative
-```{r}
-gt <- expression(2.2 + 3.1 * t - 5.6 * t^4)
 
-dg_dt <- D(expr = gt, 't')
-dg_dt
-```
-
-```{r}
-d2g_dt2 <- D(expr = dg_dt, 't')
-d2g_dt2
-```
-
-### Practice: Partial derivatives
-```{r}
-f_xyz <- expression(2*x*y - 3*(x^2)*(z^3))
-
-df_dx <- D(expr = f_xyz, 'x')
-df_dy <- D(expr = f_xyz, 'y')
-df_dz <- D(expr = f_xyz, 'z')
-
-df_dx
-df_dy
-df_dz
-```
-
-
-## Practice: day 3
+## Day 3
 
 ### Set up: define parameters
 ```{r}
@@ -409,6 +343,96 @@ vec_a * vec_b
 # put % around the * to tell R to do dot product rather than just multiplying the vectors
 vec_a %*% vec_b
 ```
+
+
+## Data exploration tools
+
+```{r}
+# Return the names of all variables (super useful for making sure you're writing variables correclty)
+names(penguins)j
+
+# Dimensions
+dim(penguins)
+
+# Get an overall summary of the data
+summary(penguins)
+
+# Look at first 3 lines (helpful for large data sets)
+head(penguins, 3)
+
+# Look at last 6  lines (helpful for large data sets)
+tail(penguins)
+
+# Use `GGally::ggpairs()` - specifically say what packages the function is from to help others looking at code in the future
+# a couple ways to narrow down which variables are being looked at
+GGally::ggpairs(penguins)
+
+# Use `skimr::skim()`
+skimr::skim(penguins)
+
+# Histogram of flipper lengths (only  need to give it one variable, R can count)
+  # `facet_wrap(~variable to split out)` splits out into different visuals
+ggplot(data = penguins, aes(x = flipper_length_mm)) +
+  geom_histogram() +
+  facet_wrap(~species)
+
+# Practice: make a faceted histogram of penguin bill_length_mm, faceted by island
+ggplot(data = penguins, aes(x = bill_length_mm)) +
+  geom_histogram() +
+  facet_wrap(~island)
+```
+
+
+## Creating Matrices in R
+Use the `matrix()` function to wrap a series of values (a vector) into a matrix.
+  - Use `nrow = ` to specify number of rows
+  - Use `ncol = ` to specify number of columns
+  - Use `byrow = TRUE` to populate the matrix by ROWS instead of columns (default is to populate by columns)
+
+```{r}
+cats <- c(1, 3, 5, 8, 10, 0.2, 4, 8, 10, 11, 100)
+# This is a vector (aka R doesn't know I want this to be anything but a list)
+
+# Wrap cats into a matrix (have to know what dimensions you want to create a matrix), will get a warning if the number of values in the vector doesn't match the number of elements based on your dimensions)
+cat_matrix <- matrix(data = cats, nrow = 4, ncol = 5, byrow = TRUE)
+```
+
+```{r}
+dogs_matrix <- matrix(data = c(1, 0, 2, 3), nrow = 2, ncol = 2, byrow = TRUE)
+# always have to use `c()` to create list of data (aka vector)
+# can create matrix without first saving data as a vector (see above)
+
+bats_matrix <- matrix(data = c(10, 53, 86, 29), nrow = 2, ncol = 2, byrow = TRUE)
+
+print(dogs_matrix + bats_matrix)
+print(4 * dogs_matrix)
+print(bats_matrix %*% dogs_matrix)
+```
+
+```{r}
+insect_leslie <- matrix(data = c(0, 0, 600, 0.2, 0, 0, 0, 0.08, 0.6), nrow = 3, ncol = 3, byrow = TRUE)
+
+# Specify the initial conditions
+# what is the population at each life stage in year 0
+insect_y0 <- c(12000, 700, 500)
+
+# Project population in each life stage for year 1
+insect_y1 <- insect_leslie %*% insect_y0
+
+# Project the population at each life stage for years 2, 3, and 4 (put in `print()` to have all matrices auto print in the console)
+print(insect_y2 <- insect_leslie %*% insect_y1)
+print(insect_y3 <- insect_leslie %*% insect_y2)
+print(insect_y4 <- insect_leslie %*% insect_y3)
+```
+
+
+
+
+
+
+
+
+
 
 
 
