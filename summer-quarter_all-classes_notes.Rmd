@@ -1,0 +1,143 @@
+---
+title: "Notes and Code from Summer Quarter (all classes)"
+author: "Clarissa Boyajian"
+date: "12/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+# EDS 212: Essential Math for Environmental Data Science
+
+### Logs and exponents in R
+Some examples of using the `log()` function and `exp()` **function** in R
+```{r}
+# Examples of logarithms
+log(4)
+
+# Example of exponents
+exp(5)
+
+# A test of log()
+log(exp(1))
+```
+
+### Creating sequences of values
+```{r}
+# A sequence from 1 to 20, by increments of 1
+ex_1_212.1 <- seq(from = 1, to = 20, by = 1)
+
+# Vector from 0 to 40 by increments of 0.2
+ex_2_212.1 <- seq(from = 0, to = 40, by = 0.2)
+
+# Vector from 1 to 5000 by increments of 10
+ex_3_212.1 <- seq(from = 1, to = 5000, by = 10)
+```
+
+### Create a function for logistic growth
+Given the carrying capacity, initial population, growth rate, and time, use the logistic growth model to estimate the population at that time.
+```{r}
+pop_logistic <- function(capacity, init_pop, rate, time_yr) {
+  capacity / (1 + ((capacity - init_pop) / init_pop) * exp(-rate * time_yr))
+}
+  
+pop_logistic(capacity = 2580, init_pop = 230, rate = 0.32, time_yr = 2.4)
+```
+
+### Try finding population over a sequence of times
+```{r}
+# Create a vector of times from 0 to 20 by increments of 0.5
+time_vec <- seq(from = 0, to = 45, by = 0.25)
+```
+
+Now let's estimate the population over that range of times, given capacity = 2580, initial population = 230, rate = 0.32
+```{r}
+chipmunk_pop <- pop_logistic(capacity = 2580, init_pop = 230, rate = 0.32, time_yr = time_vec)
+```
+
+### Create a data frame and plot chipmunk population over time
+```{r}
+chipmunk_df <- data.frame(time_vec, chipmunk_pop)
+```
+
+### Create a bare minimum ggplot graph:
+```{r}
+ggplot(data = chipmunk_df, aes(x = time_vec, y = chipmunk_pop)) +
+  geom_point() + 
+  labs(x = "Time (years)", 
+       y = "Chipmunk Population (individuals)",
+       title = "Inyo National Forest Chipmunks",
+       subtitle = "Yay Chipmunks")
+```
+
+### Creating functions
+```{r}
+G <- function(t, z) {
+  3.1 * ((t-4.2) ^ 2) + 0.06*z
+}
+
+G(t = 1, z = 2.5)
+```
+
+```{r}
+P <- function(initial, rate, time) {
+  initial*exp(rate*time)
+}
+
+P(initial = 2500, rate = 0.046, time = 4)
+```
+
+### End of Day Practice
+Make function to calculate fish weight from a, L, and b, calculate weights for one species, create table (sequence) of lengths and weights, plot lenght vs. weight
+```{r 212 day 1}
+# Create fish weight function
+W <- function(a, L, b) {
+  a * L^b}
+
+# Milkfish weights
+W(a = 0.0905, b = 2.52, L = 60)
+
+# Giant trevally weights
+W(a = 0.0353, b = 3.05, L = 60)
+
+# Great barracuda weights
+W(a = 0.0181, b = 3.27, L = 60)
+
+# Create df sequence of size ranges from 0-200 by 1 cm
+fish_length <- seq(from = 0, to = 200, by = 1)
+
+barracuda_weight <- W(a = 0.0181, b = 3.27, L = fish_length)
+
+# Bind lengths and estimate barracuda lengths in one df
+barrracuda_df <- data.frame(fish_length, barracuda_weight)
+
+# Create ggplot graph of lenghts vs. weights
+ggplot(data = barrracuda_df, aes(x = fish_length, y = barracuda_weight)) + 
+  geom_point() +
+  labs(x = "Barracuda length (cm)",
+       y = "Barracuda weight (g)",
+       title = "Comparing Great Barracudas")
+```
+
+
+
+
+
+
+
+
+# EDS 221: Scientific Programming Essentials
+
+
+
+
+
+
+
+
+
+
