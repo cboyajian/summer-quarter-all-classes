@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(deSolve)
 ```
 
 # EDS 212: Essential Math for Environmental Data Science
@@ -62,10 +63,7 @@ chipmunk_pop <- pop_logistic(capacity = 2580, init_pop = 230, rate = 0.32, time_
 ### Create a data frame and plot chipmunk population over time
 ```{r}
 chipmunk_df <- data.frame(time_vec, chipmunk_pop)
-```
 
-### Create a bare minimum ggplot graph:
-```{r}
 ggplot(data = chipmunk_df, aes(x = time_vec, y = chipmunk_pop)) +
   geom_point() + 
   labs(x = "Time (years)", 
@@ -81,9 +79,8 @@ G <- function(t, z) {
 }
 
 G(t = 1, z = 2.5)
-```
 
-```{r}
+
 P <- function(initial, rate, time) {
   initial*exp(rate*time)
 }
@@ -180,22 +177,16 @@ dh_dz
 
 ## Make some plots
 ```{r}
-# one method
 eq <- function(x) {
   (2.4 * exp(-0.05 * x)) * sin(x)
 }
 
+# one method
 ggplot(data = NULL) +
   stat_function(fun = eq) +
   xlim(min = -0.5, max = 0.5)
-```
 
-```{r}
 # different method
-eq <- function(x) {
-  (2.4 * exp(-0.05 * x)) * sin(x)
-}
-
 ggplot(data = data.frame(x = c(-0.5, 0.5)), aes(x = x)) +
   stat_function(fun = eq)
 ```
@@ -244,14 +235,14 @@ x <- 10
 eval(expr = dh_dx)
 ```
 
-## Day 2 Practice: Plot a function in `ggplot2`
+## Day 2 Practice: 
+Plot a function in `ggplot2`
 ```{r}
 eq <- function(x) {
   3 * x^2 + 4
 }
 
 # Use stat_function()
-
 ggplot(data = data.frame(x = c(1, 100)), aes(x = x)) + 
   stat_function(fun = eq)
 
@@ -261,11 +252,10 @@ ggplot(data = data.frame(x = c(1, 100)), aes(x = x)) +
 Plot $f(x)=2.4-5x^3+2.1x^2$
 Over range of -50 to +50
 ```{r}
-# two examples above of how to create `ggplot`
 p_eq <- function(x) {
   2.4 - 5 * x^3 + 2.1 * x^2
 }
-
+# two examples above of how to create `ggplot`
 ggplot(data = data.frame(x = c(-50, 50)), aes(x = x)) +
   stat_function(fun = p_eq)
 
@@ -279,7 +269,6 @@ Basic ggplot scatterplot of body mass (y) and flipper length (x)
 ```{r}
 ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
   geom_point()
-
 # positively correlated, linear slope, notice the x-axis doesn't start at 0, homosedastic (spread of data around model is pretty equal, look for clusters/patterns/etc.)
 ```
 
@@ -292,7 +281,6 @@ ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
        title = "Palmer Penguins Size Measurements", 
        caption = "Data Collected by KB Gorman et al. at Palmer Station", 
        color = "Species")
-
 # updating anything in `ggplot` based on variable has to be within aes()
 # update color using scale - google color names to know what R already knows, or can use color code names
 ```
@@ -308,7 +296,6 @@ ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
        color = "Species") +
   facet_wrap(~island) +
   theme_light()
-
 # split out into three graphs by using `facet_wrap`
 # change theme (Google to get lots of options) using `theme`
 ```
@@ -340,9 +327,88 @@ df_dz
 ```
 
 
+## Practice: day 3
+
+### Set up: define parameters
+```{r}
+### Specify parameters
+
+## Proportion in each compartment: Susceptible 0.999999, Infected 0.000001, Recovered 0 (these are directly from the example linked above)
+init <- c(S = 1-1e-6, I = 1e-6, R = 0.0)
+
+## beta: infection parameter; gamma: recovery parameter
+parameters <- c(beta = 100, gamma = 0.261)
+
+## Time frame
+times <- seq(0, 100, by = 0.5)
+```
+
+### Create the function with the differential equations:
+```{r}
+## Build the function with all 
+sir <- function(time, state, parameters) {
+
+  with(as.list(c(state, parameters)), {
+
+    dS <- -beta * S * I
+    dI <-  beta * S * I - gamma * I
+    dR <-  gamma * I
+    
+    return(list(c(dS, dI, dR)))
+  })
+}
+```
+
+### Approximate the solution using `deSolve::ode()`:
+```{r}
+## Solve using `deSolve::ode()`
+approximation <- ode(y = init, times = times, func = sir, parms = parameters)
+
+## Get output into a data frame
+approx_df <- as.data.frame(approximation)
+
+## Pivot longer so R will do the work for us: 
+approx_long <- approx_df %>% 
+  pivot_longer(cols = S:R, names_to = "population", values_to = "proportion")
+
+## Plot
+ggplot(data = approx_long, aes(x = time, y = proportion)) +
+  geom_line(aes(color = population))
+```
 
 
+## Vectors
 
+```{r}
+# Create vectors
+vec_a <- c(4, 5)
+
+vec_b <- c(-3, 10)
+```
+
+### Vecrtor addition
+```{r}
+vec_c <- vec_a + vec_b
+```
+
+### Vector subtraction
+```{r}
+vec_d <- vec_b - vec_a
+```
+
+### Vector scalor multiplier:
+```{r}
+vec_e <- 4 * vec_b
+```
+
+### Dot product
+```{r}
+# NOT correct attempt at dot product
+vec_a * vec_b
+
+# put % around the * to tell R to do dot product rather than just multiplying the vectors
+vec_a %*% vec_b
+```
 
 
 
