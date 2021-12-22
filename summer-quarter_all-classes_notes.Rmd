@@ -91,7 +91,7 @@ P <- function(initial, rate, time) {
 P(initial = 2500, rate = 0.046, time = 4)
 ```
 
-### End of Day Practice
+### End of Day 1 Practice
 Make function to calculate fish weight from a, L, and b, calculate weights for one species, create table (sequence) of lengths and weights, plot lenght vs. weight
 ```{r 212 day 1}
 # Create fish weight function
@@ -122,6 +122,224 @@ ggplot(data = barrracuda_df, aes(x = fish_length, y = barracuda_weight)) +
        y = "Barracuda weight (g)",
        title = "Comparing Great Barracudas")
 ```
+
+
+## Derivatives in R
+
+### First order univariate derivatives
+```{r}
+fx <- expression(x^2)
+
+df_dx <- D(expr = fx, name = 'x')
+x <- 3
+
+eval(expr = df_dx)
+```
+
+```{r}
+Pa <- expression(2 * (3 * a + 2)^4 - 5)
+
+dP_da <- D(expr = Pa, name = 'a')
+a <- 1.2
+
+eval(expr = dP_da)
+```
+
+```{r}
+gt <- expression((-4) / (t^2 +1)^3)
+
+dg_dt <- D(expr = gt, name ='t')
+t <- 0
+
+eval (expr = dg_dt)
+```
+
+### Higher order univariate derivatives
+```{r}
+Gz <- expression(4.6 - 1.9 * z^3)
+
+dG_dz <- D(expr = Gz, name = 'z')
+
+d2G_dz2 <- D(expr = dG_dz, name = 'z')
+
+d2G_dz2
+```
+
+### Partial derivatives
+```{r}
+h_xyz <- expression(2 * x^2 * y - 3 * x + 1 + 4 * z^4 * x)
+
+dh_dx <- D(expr = h_xyz, name = 'x')
+dh_dy <- D(expr = h_xyz, name = 'y')
+dh_dz <- D(expr = h_xyz, name = 'z')
+
+dh_dx
+dh_dy
+dh_dz
+```
+
+## Make some plots
+```{r}
+# one method
+eq <- function(x) {
+  (2.4 * exp(-0.05 * x)) * sin(x)
+}
+
+ggplot(data = NULL) +
+  stat_function(fun = eq) +
+  xlim(min = -0.5, max = 0.5)
+```
+
+```{r}
+# different method
+eq <- function(x) {
+  (2.4 * exp(-0.05 * x)) * sin(x)
+}
+
+ggplot(data = data.frame(x = c(-0.5, 0.5)), aes(x = x)) +
+  stat_function(fun = eq)
+```
+
+```{r}
+ggplot(data = penguins, aes(x = bill_depth_mm, y = bill_length_mm)) + 
+  geom_point(aes(color = species)) +
+  scale_color_manual(values = c("cyan", "purple", "red"))
+```
+
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = species)) +
+  geom_jitter() +
+  labs(x = 'Flipper Length (mm)', y = 'Penguin Species',
+  title= 'Flipper Length Compared to Species')
+```
+
+
+## Day 2 Practice: Derivatives in R
+```{r}
+fx <- expression(x^2)
+
+df_dx <- D(expr = fx, name = 'x')
+df_dx
+
+# Evaluate the slope of f(x) at x = 831
+x <- seq(from = -10, to = 10, by = 0.5)
+eval(expr = df_dx)
+```
+
+```{r}
+gt <- expression(3 * t^2 - 4 * cos(t)) 
+
+dg_dt <- D(expr = gt, name = 't')
+dg_dt
+```
+
+```{r}
+# Practice making derivatives
+hx <- expression(exp(2 * x^3 - 4 * x^10) - 4 * x - 4)
+
+dh_dx <- D(expr = hx, name = 'x')
+dh_dx
+
+x <- 10
+eval(expr = dh_dx)
+```
+
+## Day 2 Practice: Plot a function in `ggplot2`
+```{r}
+eq <- function(x) {
+  3 * x^2 + 4
+}
+
+# Use stat_function()
+
+ggplot(data = data.frame(x = c(1, 100)), aes(x = x)) + 
+  stat_function(fun = eq)
+
+```
+
+### Practice:
+Plot $f(x)=2.4-5x^3+2.1x^2$
+Over range of -50 to +50
+```{r}
+# two examples above of how to create `ggplot`
+p_eq <- function(x) {
+  2.4 - 5 * x^3 + 2.1 * x^2
+}
+
+ggplot(data = data.frame(x = c(-50, 50)), aes(x = x)) +
+  stat_function(fun = p_eq)
+
+ggplot(data = NULL) + 
+  stat_function(fun = p_eq) +
+  xlim(min = -50, max = 50)
+```
+
+### Practice: `penguins` body mass and flipper lenghts
+Basic ggplot scatterplot of body mass (y) and flipper length (x)
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+
+# positively correlated, linear slope, notice the x-axis doesn't start at 0, homosedastic (spread of data around model is pretty equal, look for clusters/patterns/etc.)
+```
+
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point(aes(color = species)) + 
+  scale_color_manual(values = c("cyan", "purple", "red")) +
+  labs(x = "Flipper Length (mm)", 
+       y = "Body Mass (g)", 
+       title = "Palmer Penguins Size Measurements", 
+       caption = "Data Collected by KB Gorman et al. at Palmer Station", 
+       color = "Species")
+
+# updating anything in `ggplot` based on variable has to be within aes()
+# update color using scale - google color names to know what R already knows, or can use color code names
+```
+
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point(aes(color = species)) + 
+  scale_color_manual(values = c("cyan", "purple", "red")) +
+  labs(x = "Flipper Length (mm)", 
+       y = "Body Mass (g)", 
+       title = "Palmer Penguins Size Measurements", 
+       caption = "Data Collected by KB Gorman et al. at Palmer Station", 
+       color = "Species") +
+  facet_wrap(~island) +
+  theme_light()
+
+# split out into three graphs by using `facet_wrap`
+# change theme (Google to get lots of options) using `theme`
+```
+
+### Practice: Higher Order Derivative
+```{r}
+gt <- expression(2.2 + 3.1 * t - 5.6 * t^4)
+
+dg_dt <- D(expr = gt, 't')
+dg_dt
+```
+
+```{r}
+d2g_dt2 <- D(expr = dg_dt, 't')
+d2g_dt2
+```
+
+### Practice: Partial derivatives
+```{r}
+f_xyz <- expression(2*x*y - 3*(x^2)*(z^3))
+
+df_dx <- D(expr = f_xyz, 'x')
+df_dy <- D(expr = f_xyz, 'y')
+df_dz <- D(expr = f_xyz, 'z')
+
+df_dx
+df_dy
+df_dz
+```
+
+
 
 
 
