@@ -470,12 +470,6 @@ sw_height_sd # units are cm
 3 <= 1
 ```
 
-```{r}
-tarantulas <- c(1, 3, 7, 10, 15)
-
-tarantulas > 5
-```
-
 ## logical operators
   `!` - not
   `&` - and
@@ -500,14 +494,155 @@ tarantulas > 5
 
 
 
-
-
-
-
-
-
-
 # EDS 221: Scientific Programming Essentials
+
+
+## Vector classes
+```{r}
+# Create vector with character class:
+cats <- c("olive", 20, TRUE, 5L)
+# check the class: `class(cats)` - do in console generally (don't need saved)
+# if there are characters in your vector everything will get assigned to character (only  one data type in vectors)
+
+# Create vector with numeric class:
+cat_age <- c(1.4, 5.2, 6, 10)
+#check the class: `class(cats_age)`
+
+# Create vector with integer class:
+cat_miles <- c(4L, 5L, 6L)
+typeof(cat_miles)
+# check type of vector with `typeof()`
+
+# Use question to check if it's character class
+is.character(cat_miles)
+is.character(cats)
+```
+
+## Indexing in R
+```{r}
+cat_food <- c(olive = "wild ones",
+               chico = "blue diamond",
+               gus = "fancy feast",
+               neko = "purina")
+
+cat_food
+typeof(cat_food)
+
+chico_food <- cat_food[2]
+# can call out specific "column" based on location in vector
+cat_food["chico"]
+# call out specific "columns" from value name vector
+
+cat_size <- c(olive = 8, chico = 13)
+test <- 6 + cat_size[2]
+test
+```
+
+```{r}
+cars <- c("red", "white", "yellow", "silver", "blue", "black", "purple", "green", "gray")
+
+cars[2:5]
+
+i <- 3
+cars[i]
+# because i is stored at 3, it calls out the 3rd position value
+
+i <- c(1, 5, 7)
+cars[i]
+# overwrote i above, then pulled the 1st, 5th, and 7th colors with new `cars[]`
+
+cars[3] <- "BURRITOS"
+# vectors are mutable in R, so can change the 3rd position by using `cars[location #] <- "new name"`
+```
+
+## Lists in R
+```{r}
+urchins <- list("blue", 
+                c(1, 2, 3), 
+                seq(from = 0, to = 50, by = 0.5), 
+                1200L)
+# use L at end of number to tell R to store a number as an integer
+
+urchins
+# [[1]] - tells you element of list
+# [1] - tells us what we're at within the list (if wraps to multiple line will tell us how many we're at, at the beginning of each line)
+
+urchins[[1]]
+# double square brackets shows you the contents of the element (ALMOST ALWAYS USE THIS)
+urchins[1]
+# single square bracket shows you the list of the element
+```
+
+```{r}
+tacos <- list(topping = c("onoin", "cilantro", "guacamole"),
+              filling = c("beans", "meat", "veggies"), 
+              price = c(6.75, 8.25, 9.50))
+# can convert into data frame (because all vectors are same lengths)
+
+taco_price <- c(tacos$price)
+taco_price <- tacos[[3]]
+```
+
+## Indexing a data frame
+```{r}
+fruit <- data.frame(type = c("apple", "banana", "peach"),
+                    mass = c(130, 195, 150))
+
+fruit
+# data frame structure is what we usually see data as (ex: excel, tables)
+class(fruit)
+class(fruit$mass)
+
+fruit$type
+fruit[, 1]
+# leave row term blank to request all info in rows, include 1 for only column 1
+```
+
+
+## Practice filtering
+```{r}
+stl_lead <- read_csv(here::here("data", "stl_blood_lead.csv")) 
+
+stl_lead <- stl_lead %>% clean_names()
+```
+
+```{r}
+stl_lead_prop <- 
+  stl_lead %>% 
+  dplyr::mutate(prop_white = (white / total_pop) * 100) %>% 
+  dplyr::mutate(pct_elevated = str_replace(pct_elevated, 
+                                           pattern = ",", 
+                                           replacement = ".")) %>% 
+  dplyr::mutate(pct_elevated = as.numeric(pct_elevated))
+```
+
+```{r}
+stl_lead_plot <- ggplot(data = stl_lead_prop, aes(x = pct_elevated, y = prop_white)) +
+  geom_point(size = 1, aes(color = prop_white), show.legend = FALSE) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Eleveated Blood Lead Level", y = "Percent of White IDing Population")
+  
+  stl_lead_plot
+  
+  ggsave(here::here("figs", "stl_lead_plot.png"), 
+         plot = stl_lead_plot, 
+         height = 5, 
+         width = 6)
+```
+There is a negative correlation between having elevated blood lead levels and identifying as white on the census
+
+```{r, message = FALSE}
+stl_lead_hist <- ggplot(data = stl_lead_prop, aes(x = pct_elevated)) +
+  geom_histogram(fill = "purple", color = "black") +
+  labs(x = "Elevated Blood Lead Level", y = "Count")
+
+stl_lead_hist
+
+ggsave(here::here("figs", "stl_lead_hist.jpg"))
+```
+
+
+
 
 
 
